@@ -2,7 +2,9 @@ name: build and publish docker image
 
 on:
   release:
-    types: [published]
+    types: 
+      - published
+      - created
   
   page_build:
   workflow_dispatch:
@@ -28,6 +30,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          
+      - name: get tag name
+        id: tag_name
+        run: |
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
                 
       - name: build and push
         uses: docker/build-push-action@v2
@@ -35,5 +42,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          build-args: TAG=${{ github.ref }}
-          tags: dotwee/matrix-synapse-s3:${{ github.ref }}
+          build-args: TAG=${{ steps.tag_name.outputs.SOURCE_TAG }}
+          tags: dotwee/matrix-synapse-s3:${{ steps.tag_name.outputs.SOURCE_TAG }}
