@@ -44,7 +44,7 @@ jobs:
           push: true
           cache-from: type=registry,ref=${{ steps.prep.outputs.tags }}
           cache-to: type=inline
-          build-args: TAG=${{ github.ref }}
+          build-args: TAG=latest
           tags: |
-            docker.io/dotwee/matrix-synapse-s3:${{ github.sha }}
-            docker.io/dotwee/matrix-synapse-s3:${{ github.ref }}
+            dotwee/matrix-synapse-s3:${{ github.sha }}
+            dotwee/matrix-synapse-s3:${{ github.ref }}
