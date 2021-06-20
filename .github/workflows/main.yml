@@ -6,10 +6,6 @@ on:
       - "main"
     tags:
       - "v*.*.*"
-      
-  release:
-    types: [published]
-      
   create:
   page_build:
   workflow_dispatch:
