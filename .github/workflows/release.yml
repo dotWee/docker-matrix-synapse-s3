@@ -52,4 +52,6 @@ jobs:
           build-args: TAG=${{ steps.tag_name.outputs.SOURCE_TAG }}
           tags: |
             dotwee/matrix-synapse-s3:${{ steps.tag_name.outputs.SOURCE_TAG }}
+            dotwee/matrix-synapse-s3:$GITHUB_SHA
             ghcr.io/dotwee/matrix-synapse-s3:${{ steps.tag_name.outputs.SOURCE_TAG }}
+            ghcr.io/dotwee/matrix-synapse-s3:$GITHUB_SHA
