@@ -43,6 +43,7 @@ jobs:
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           build-args: TAG=latest
-          tags: |
-            dotwee/matrix-synapse-s3:${{ github.sha }}
-            dotwee/matrix-synapse-s3:${{ github.ref }}
+          tags: dotwee/matrix-synapse-s3:latest
+          #tags: |
+          #  dotwee/matrix-synapse-s3:${{ github.sha }}
+          #  dotwee/matrix-synapse-s3:${{ github.ref }}
