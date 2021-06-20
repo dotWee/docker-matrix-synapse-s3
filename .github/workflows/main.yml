@@ -42,8 +42,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          cache-from: type=registry,ref=${{ steps.prep.outputs.tags }}
-          cache-to: type=inline
           build-args: TAG=latest
           tags: |
             dotwee/matrix-synapse-s3:${{ github.sha }}
