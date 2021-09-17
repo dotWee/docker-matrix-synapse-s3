@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 0 * * *'
   push:
+  workflow_dispatch:
+    inputs:
+     version_name:
+        description: 'Name of version (eg: v42.0.1)'
+        required: true
 
 jobs:
   validate:
@@ -16,10 +21,11 @@ jobs:
     steps:
       - name: Install depepndencies
         run: sudo apt-get install -y curl jq
+        
       - name: Check new version
         id: check
         run: |
-          synapse_version=`curl -SsL https://api.github.com/repos/matrix-org/synapse/releases | jq -r '.[].tag_name' | head -n 1`
+          synapse_version=`curl -SsL https://api.github.com/repos/matrix-org/synapse/releases | jq -r '.[].tag_name' | head -n 1`          
           echo "::set-output name=version::${synapse_version}"
           
           docker_version=`curl -sSL 'https://registry.hub.docker.com/v2/repositories/dotwee/matrix-synapse-s3/tags' | jq -r '."results"[]["name"] | select(.=="'${synapse_version}'")'`
@@ -28,8 +34,15 @@ jobs:
           else
             echo "::set-output name=new::true"
           fi
+          
+      - name: Overwrite version if manually dispatched event
+        if: github.event.inputs.version_name != ''
+        run: |
+          echo "::set-output name=version::${{ github.event.inputs.version_name }}"
+          echo "::set-output name=new::true"
+
       - name: Print outputs
-        run: echo version=${{steps.check.outputs.version}}  new=${{steps.check.outputs.new}}
+        run: echo "version=${{steps.check.outputs.version}} new=${{steps.check.outputs.new}}"
 
   release:
     runs-on: ubuntu-latest
