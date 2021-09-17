@@ -1,4 +1,4 @@
-name: release-cron
+name: cron
 
 on:
   schedule:
