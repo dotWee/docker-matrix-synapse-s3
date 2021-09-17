@@ -79,15 +79,17 @@ jobs:
             dotwee/matrix-synapse-s3:latest
             ghcr.io/dotwee/matrix-synapse-s3:latest
 
-      - name: Update repo description
+      - name: Update Docker Hub repository description
         uses: peter-evans/dockerhub-description@v2
         with:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
           repository: dotwee/matrix-synapse-s3
     
-      - name: Create a release tag
+      - name: Create a GitHub repository release tag
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
           title: ${{ needs.validate.outputs.version }}
+          prerelease: ${{ contains(needs.validate.outputs.version, 'rc') }}
+          automatic_release_tag: latest
