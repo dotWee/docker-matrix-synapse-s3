@@ -1,53 +1,77 @@
 name: cron
 
 on:
+  push:
+
   schedule:
     - cron: '0 0 * * *'
-  push:
+
   workflow_dispatch:
     inputs:
      version_name:
-        description: 'Name of version (eg: v42.0.1)'
+        description: 'Name of version (eg: v1.42.0)'
         required: true
+        default: "v1.42.0"
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-
     outputs:
-      new: ${{ steps.check.outputs.new }}
-      version: ${{ steps.check.outputs.version }}
+      version_name: ${{ steps.set-version-name.outputs.version_name }}
+      is_new_version: ${{ steps.compare-versions.outputs.is_new_version }}
+      publish_version: ${{ steps.set-publish-version.outputs.publish_version }}
 
     steps:
       - name: Install depepndencies
         run: sudo apt-get install -y curl jq
-        
-      - name: Check new version
-        id: check
-        run: |
-          synapse_version=`curl -SsL https://api.github.com/repos/matrix-org/synapse/releases | jq -r '.[].tag_name' | head -n 1`          
-          echo "::set-output name=version::${synapse_version}"
-          
-          docker_version=`curl -sSL 'https://registry.hub.docker.com/v2/repositories/dotwee/matrix-synapse-s3/tags' | jq -r '."results"[]["name"] | select(.=="'${synapse_version}'")'`
-          if [ "${synapse_version}" == "${docker_version}" ]; then
-            echo "::set-output name=new::false"
-          else
-            echo "::set-output name=new::true"
-          fi
-          
-      - name: Overwrite version if manually dispatched event
-        if: github.event.inputs.version_name != ''
-        run: |
-          echo "::set-output name=version::${{ github.event.inputs.version_name }}"
-          echo "::set-output name=new::true"
+      - name: Request current GitHub Synapse Package version
+        run: echo 'SYNAPSE_VERSION='$(curl -SsL https://api.github.com/repos/matrix-org/synapse/releases | jq -r '.[].tag_name' | head -n 1) >> $GITHUB_ENV
 
-      - name: Print outputs
-        run: echo "version=${{steps.check.outputs.version}} new=${{steps.check.outputs.new}}"
+      - name: Request current Docker Hub Package version
+        run: echo 'DOCKER_VERSION='$(curl -sSL https://registry.hub.docker.com/v2/repositories/dotwee/matrix-synapse-s3/tags | jq -r '."results"[]["name"] | select(.=="'${{ env.SYNAPSE_VERSION }}'")') >> $GITHUB_ENV
+
+      - name: Overwrite versions if manually dispatched event
+        if: ${{ github.event.inputs.version_name != '' }}
+        run: |
+          echo 'SYNAPSE_VERSION=${{ github.event.inputs.version_name }}' >> $GITHUB_ENV
+          echo 'DOCKER_VERSION=""' >> $GITHUB_ENV
+
+      - name: Validate version-name is in format vXX.XX.XX
+        uses: actions-ecosystem/action-regex-match@v2
+        id: validate-version-name
+        with:
+          text: ${{ env.SYNAPSE_VERSION }}
+          regex: '^v\d+\.\d+\.\d+(?:rc\d+(?:\.\d)*)?$'
+          flags: gm
+
+      - name: Set & echo version name output
+        if: ${{ steps.validate-version-name.outputs.match == '' }}
+        run: |
+          echo "::error title=Invalid version_name format::The value ${{ env.SYNAPSE_VERSION }} is not a valid version_name value"
+          return -1
+
+      - name: Set & echo version name output
+        id: set-version-name
+        run: |
+          echo "SYNAPSE_VERSION=${{ env.SYNAPSE_VERSION }} DOCKER_VERSION=${{ env.DOCKER_VERSION }}"
+          echo "::set-output name=version_name::${{ env.SYNAPSE_VERSION }}"
+
+      - name: Compare versions
+        id: compare-versions
+        run: echo "::set-output name=is_new_version::${{ env.SYNAPSE_VERSION != env.DOCKER_VERSION }}"
+
+      - name: Set publish to false if manually triggered
+        id: set-publish-version
+        run: echo "::set-output name=publish_version::${{ github.event.inputs.version_name == '' }}"
+
+      - name: Echo outputs
+        run: echo "version_name=${{ steps.set-version-name.outputs.version_name }} is_new_version=${{ steps.compare-versions.outputs.is_new_version }} publish_version=${{ steps.set-publish-version.outputs.publish_version }}"
 
   release:
     runs-on: ubuntu-latest
     needs: validate
-    if: needs.validate.outputs.new == 'true'
+    if: ${{ needs.validate.outputs.is_new_version == 'true' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -57,6 +81,14 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+        
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -71,38 +103,39 @@ jobs:
           username: ${{ secrets.GH_REGISTRY_USERNAME }}
           password: ${{ secrets.GH_REGISTRY_TOKEN }}
 
-      - name: Build and push only with version tag
+      - name: Build and push docker image with version tag
         uses: docker/build-push-action@v2
+        id: docker-build
         with:
           platforms: linux/amd64,linux/arm64
-          build-args: TAG=${{ needs.validate.outputs.version }}
-          push: true
+          build-args: TAG=${{ needs.validate.outputs.version_name }}
+          push: ${{ needs.validate.outputs.publish_version }}
           tags: |
-            dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version }}
-            ghcr.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version }}
+            dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
+            ghcr.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
 
-      - name: Build & push with version + latest tag
-        if: ${{ !contains( needs.validate.outputs.version , 'rc') }}
-        uses: docker/build-push-action@v2
+      - name: Push image with latest tag if not release candidate
+        uses: akhilerm/tag-push-action@v1.1.0
+        if: ${{ needs.validate.outputs.publish_version == 'true' && !contains(needs.validate.outputs.version_name, 'rc') }}
         with:
-          platforms: linux/amd64,linux/arm64
-          build-args: TAG=${{ needs.validate.outputs.version }}
-          push: true
-          tags: |
-            dotwee/matrix-synapse-s3:latest
+          src: docker.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
+          dst: |
+            docker.io/dotwee/matrix-synapse-s3:latest
             ghcr.io/dotwee/matrix-synapse-s3:latest
 
       - name: Update Docker Hub repository description
         uses: peter-evans/dockerhub-description@v2
+        if: ${{ needs.validate.outputs.publish_version }}
         with:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
           repository: dotwee/matrix-synapse-s3
-    
+
       - name: Create a GitHub repository release tag
         uses: "marvinpinto/action-automatic-releases@latest"
+        if: ${{ needs.validate.outputs.publish_version == 'true' }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          title: ${{ needs.validate.outputs.version }}
-          prerelease: ${{ contains(needs.validate.outputs.version, 'rc') }}
+          title: ${{ needs.validate.outputs.version_name }}
+          prerelease: ${{ contains(needs.validate.outputs.version_name, 'rc') }}
           automatic_release_tag: latest
