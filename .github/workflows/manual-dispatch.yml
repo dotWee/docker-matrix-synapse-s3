@@ -11,37 +11,46 @@ jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
-      version_name: ${{ steps.version.outputs.version_name }}
-      is_new_version: ${{ steps.compare.outputs.version_name }}
+      version_name: ${{ steps.set-version-name.outputs.version_name }}
+      is_new_version: ${{ steps.compare-versions.outputs.version_name }}
       
     steps:
       - name: Install depepndencies
         run: sudo apt-get install -y curl jq
       - name: Request current GitHub Synapse Package version
         run: echo 'SYNAPSE_VERSION='$(curl -SsL https://api.github.com/repos/matrix-org/synapse/releases | jq -r '.[].tag_name' | head -n 1) >> $GITHUB_ENV
+
       - name: Request current Docker Hub Package version
         run: echo 'DOCKER_VERSION='$(curl -sSL 'https://registry.hub.docker.com/v2/repositories/dotwee/matrix-synapse-s3/tags' | jq -r '."results"[]["name"] | select(.=="'${synapse_version}'")') >> $GITHUB_ENV
+
       - name: Overwrite versions if manually dispatched event
         if: ${{ github.event.inputs.version_name != '' }}
         run: |
           echo 'SYNAPSE_VERSION=${{ github.event.inputs.version_name }}' >> $GITHUB_ENV
           echo 'DOCKER_VERSION=""' >> $GITHUB_ENV
-      - uses: actions-ecosystem/action-regex-match@v2
-        id: regex-match-version
-        with:
-          text: ${{ env.SYNAPSE_VERSION }}
-          regex: '^v\d+\.\d+\.\d+(?:-rc\d+(?:\.\d)*)?$'
-          flags: gm
+
       - name: Set & echo version name output
-        id: version
+        id: set-version-name
         run: |
-          echo "SYNAPSE_VERSION=${{ env.SYNAPSE_VERSION }} (aka version output) DOCKER_VERSION=${{ env.DOCKER_VERSION }} VALID_VERSION=${{ steps.regex-match-version.outputs.match }}"
+          echo "SYNAPSE_VERSION=${{ env.SYNAPSE_VERSION }} DOCKER_VERSION=${{ env.DOCKER_VERSION }}"
           echo "::set-output name=version_name::${{ env.SYNAPSE_VERSION }}"
+  
       - name: Compare versions
-        id: compare
+        id: compare-versions
         run: |
           if [ "${{ env.SYNAPSE_VERSION }}" == "${{ env.DOCKER_VERSION }}" ]; then
             echo "::set-output name=is_new_version::false"
           else
             echo "::set-output name=is_new_version::true"
           fi
+
+      - name: Validate version-name is in format vXX.XX.XX
+        uses: actions-ecosystem/action-regex-match@v2
+        id: validate-version-name
+        with:
+          text: ${{ steps.set-version-name.outputs.version_name }}
+          regex: '^v\d+\.\d+\.\d+(?:-rc\d+(?:\.\d)*)?$'
+          flags: gm
+
+      - name: Echo outputs
+        run: echo "match=${{ steps.validate-version-name.outputs.match }} version_name=${{ steps.set-version-name.outputs.version_name }} is_new_version=${{ steps.compare-versions.outputs.is_new_version }}"
