@@ -138,3 +138,4 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           title: ${{ needs.validate.outputs.version_name }}
           prerelease: ${{ contains(needs.validate.outputs.version_name, 'rc') }}
+          automatic_release_tag: ${{ needs.validate.outputs.version_name }}
