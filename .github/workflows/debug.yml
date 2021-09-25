@@ -37,8 +37,8 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo variables
-        run: echo "build_with_cache=${{ github.event.inputs.build_with_cache }} docker_tag_latest=${{ github.event.inputs.docker_tag_latest }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
+      #- name: Echo variables
+      #  run: echo "docker_tag_latest=${{ github.event.inputs.docker_tag_latest }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
         
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -56,19 +56,16 @@ jobs:
           images: |
             dotwee/matrix-synapse-s3
             ghcr.io/dotwee/matrix-synapse-s3
-            ghcr.io/${{ github.repository }}
 
           labels: |
             org.opencontainers.image.title=matrix-synapse-s3
             org.opencontainers.image.vendor=${{ github.repository_owner }}
             
           flavor: |
-            latest=${{ github.event.inputs.docker_tag_latest }}
+            latest=${{ github.event.inputs.docker_tag_latest == 'true' }}
             
           tags: |
-            type=raw,value=${{ github.event.inputs.synapse_version_name }}
-          
-          #  type=semver,pattern={{version}},value=${{ github.event.inputs.synapse_version_name }}
+            type=semver,pattern={{version}},value=${{ github.event.inputs.synapse_version_name }}
 
       - name: Echo docker metadata
         run: |
