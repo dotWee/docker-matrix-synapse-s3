@@ -6,12 +6,12 @@ on:
       build_with_cache:
         description: 'Enable docker build cache'
         required: false
-        default: "true"
+        default: "false"
      
       docker_tag_latest:
         description: 'Add latest tag to docker images'
         required: false
-        default: "false"
+        default: "true"
        
       push_docker_images:
         description: 'Push built docker images to docker hub'
