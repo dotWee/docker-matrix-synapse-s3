@@ -62,8 +62,8 @@ jobs:
             type=raw,value=${{ github.event.inputs.synapse_version_name }}
             type=semver,pattern={{raw}},value=${{ github.event.inputs.synapse_version_name }}
           labels: |
+            maintainer=Lukas Wolfsteiner <lukas@wolfsteiner.media>
             org.opencontainers.image.title=matrix-synapse-s3
-            org.opencontainers.image.vendor=${{ github.repository_owner }}
             
       - name: Echo docker metadata
         run: |
