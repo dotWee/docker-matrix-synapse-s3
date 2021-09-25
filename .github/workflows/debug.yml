@@ -6,8 +6,13 @@ on:
       build_with_cache:
         description: 'Enable docker build cache'
         required: false
+        default: "false"
+     
+      docker_tag_latest:
+        description: 'Add latest tag to docker images'
+        required: false
         default: "true"
-        
+       
       push_docker_images:
         description: 'Push built docker images to docker hub'
         required: false
@@ -17,6 +22,11 @@ on:
         description: 'Update the README hosted on the docker hub project site'
         required: false
         default: "false"
+
+      synapse_storage_provider_commit:
+        description: 'Commit hash of synapse-s3-storage-provider'
+        required: false
+        default: "main"
         
       synapse_version_name:
         description: 'Name of synapse release version (eg: v1.42.0)'
@@ -32,14 +42,8 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      #- name: Echo variables
+      #  run: echo "docker_tag_latest=${{ github.event.inputs.docker_tag_latest }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
         
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -50,6 +54,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            dotwee/matrix-synapse-s3
+            ghcr.io/dotwee/matrix-synapse-s3
+          flavor: |
+            latest=${{ github.event.inputs.docker_tag_latest == 'true' || github.event.inputs.synapse_version_name == 'latest' }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.synapse_version_name }}
+            type=semver,pattern={{raw}},value=${{ github.event.inputs.synapse_version_name }}
+          labels: |
+            maintainer=Lukas Wolfsteiner <lukas@wolfsteiner.media>
+            org.opencontainers.image.title=matrix-synapse-s3
+            
+      - name: Echo docker metadata
+        run: |
+          echo "labels=${{ steps.meta.outputs.labels }}"
+          echo "tags=${{ steps.meta.outputs.tags }}"
+        
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         if: ${{ github.event.inputs.push_docker_images == 'true' }}
@@ -67,16 +101,14 @@ jobs:
 
       - name: Build and push docker image with version tag
         uses: docker/build-push-action@v2
-        id: docker-build
         with:
           platforms: linux/amd64,linux/arm64
-          build-args: TAG=${{ github.event.inputs.synapse_version_name }}
+          build-args: |
+            SYNAPSE_VERSION=${{ github.event.inputs.synapse_version_name }}
+            SYNAPSE_S3_STORAGE_PROVIDER_COMMIT=${{ github.event.inputs.synapse_storage_provider_commit }}
           push: ${{ github.event.inputs.push_docker_images == 'true' }}
-          tags: |
-            dotwee/matrix-synapse-s3:latest
-            dotwee/matrix-synapse-s3:${{ github.event.inputs.synapse_version_name }}
-            ghcr.io/dotwee/matrix-synapse-s3:latest
-            ghcr.io/dotwee/matrix-synapse-s3:${{ github.event.inputs.synapse_version_name }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Update Docker Hub repository description
         uses: peter-evans/dockerhub-description@v2
@@ -87,7 +119,7 @@ jobs:
           repository: dotwee/matrix-synapse-s3
 
       - name: Create a GitHub repository release tag
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: marvinpinto/action-automatic-releases@latest
         if: ${{ github.event.inputs.create_github_release_tag == 'true' }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
