@@ -56,14 +56,15 @@ jobs:
           images: |
             dotwee/matrix-synapse-s3
             ghcr.io/dotwee/matrix-synapse-s3
-          labels: |
-            org.opencontainers.image.title=matrix-synapse-s3
-            org.opencontainers.image.vendor=${{ github.repository_owner }}
-          flavor: latest=${{ github.event.inputs.docker_tag_latest == 'true' || github.event.inputs.synapse_version_name == 'latest' }}
+          flavor: |
+            latest=${{ github.event.inputs.docker_tag_latest == 'true' || github.event.inputs.synapse_version_name == 'latest' }}
           tags: |
             type=raw,value=${{ github.event.inputs.synapse_version_name }}
             type=semver,pattern={{raw}},value=${{ github.event.inputs.synapse_version_name }}
-
+          labels: |
+            org.opencontainers.image.title=matrix-synapse-s3
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            
       - name: Echo docker metadata
         run: |
           echo "labels=${{ steps.meta.outputs.labels }}"
