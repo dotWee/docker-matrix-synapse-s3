@@ -56,6 +56,7 @@ jobs:
           images: |
             dotwee/matrix-synapse-s3
             ghcr.io/dotwee/matrix-synapse-s3
+            ghcr.io/${{ github.repository }}
 
           labels: |
             maintainer="Lukas Wolfsteiner <lukas@wolfsteiner.media>"
