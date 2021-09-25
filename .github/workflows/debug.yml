@@ -22,6 +22,11 @@ on:
         description: 'Update the README hosted on the docker hub project site'
         required: false
         default: "false"
+
+      synapse_storage_provider_commit:
+        description: 'Commit hash of synapse-s3-storage-provider'
+        required: false
+        default: "main"
         
       synapse_version_name:
         description: 'Name of synapse release version (eg: v1.42.0)'
@@ -98,7 +103,9 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           platforms: linux/amd64,linux/arm64
-          build-args: TAG=${{ github.event.inputs.synapse_version_name }}
+          build-args: |
+            SYNAPSE_VERSION=${{ github.event.inputs.synapse_version_name }}
+            SYNAPSE_S3_STORAGE_PROVIDER_COMMIT=${{ github.event.inputs.synapse_storage_provider_commit }}
           push: ${{ github.event.inputs.push_docker_images == 'true' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
