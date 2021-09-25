@@ -1,17 +1,9 @@
 name: cron
 
 on:
-  # push:
-
+  push:
   schedule:
     - cron: '0 0 * * *'
-
-  workflow_dispatch:
-    inputs:
-     version_name:
-        description: 'Name of version (eg: v1.42.0)'
-        required: true
-        default: "v1.42.0"
 
 jobs:
   validate:
@@ -103,24 +95,37 @@ jobs:
           username: ${{ secrets.GH_REGISTRY_USERNAME }}
           password: ${{ secrets.GH_REGISTRY_TOKEN }}
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            dotwee/matrix-synapse-s3
+            ghcr.io/dotwee/matrix-synapse-s3
+          flavor: |
+            latest=${{ needs.validate.outputs.version_name == 'true' }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.synapse_version_name }}
+            type=semver,pattern={{raw}},value=${{ github.event.inputs.synapse_version_name }}
+          labels: |
+            maintainer=Lukas Wolfsteiner <lukas@wolfsteiner.media>
+            org.opencontainers.image.title=matrix-synapse-s3
+
       - name: Build and push docker image with version tag
         uses: docker/build-push-action@v2
         id: docker-build
         with:
           platforms: linux/amd64,linux/arm64
           build-args: |
-            SYNAPSE_VERSION=${{ github.event.inputs.synapse_version_name }}
+            SYNAPSE_VERSION=${{ needs.validate.outputs.version_name }}
             SYNAPSE_S3_STORAGE_PROVIDER_COMMIT=main
-          push: ${{ needs.validate.outputs.publish_version }}
-          tags: |
-            dotwee/matrix-synapse-s3:latest
-            dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
-            ghcr.io/dotwee/matrix-synapse-s3:latest
-            ghcr.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
+          push: ${{ needs.validate.outputs.publish_version == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Update Docker Hub repository description
         uses: peter-evans/dockerhub-description@v2
-        if: ${{ needs.validate.outputs.publish_version }}
+        if: ${{ needs.validate.outputs.publish_version == 'true' }}
         with:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
