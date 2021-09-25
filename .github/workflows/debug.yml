@@ -32,6 +32,9 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
+      - name: Echo variables
+        run: echo "build_with_cache=${{ github.event.inputs.build_with_cache }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
+        
       - name: Checkout
         uses: actions/checkout@v2
 
