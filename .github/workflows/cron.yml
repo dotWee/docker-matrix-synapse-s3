@@ -111,17 +111,10 @@ jobs:
           build-args: TAG=${{ needs.validate.outputs.version_name }}
           push: ${{ needs.validate.outputs.publish_version }}
           tags: |
+            dotwee/matrix-synapse-s3:latest
             dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
-            ghcr.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
-
-      - name: Push image with latest tag if not release candidate
-        uses: akhilerm/tag-push-action@v1.1.0
-        if: ${{ needs.validate.outputs.publish_version == 'true' && !contains(needs.validate.outputs.version_name, 'rc') }}
-        with:
-          src: docker.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
-          dst: |
-            docker.io/dotwee/matrix-synapse-s3:latest
             ghcr.io/dotwee/matrix-synapse-s3:latest
+            ghcr.io/dotwee/matrix-synapse-s3:${{ needs.validate.outputs.version_name }}
 
       - name: Update Docker Hub repository description
         uses: peter-evans/dockerhub-description@v2
