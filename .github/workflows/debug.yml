@@ -56,16 +56,11 @@ jobs:
           images: |
             dotwee/matrix-synapse-s3
             ghcr.io/dotwee/matrix-synapse-s3
-
           labels: |
             org.opencontainers.image.title=matrix-synapse-s3
             org.opencontainers.image.vendor=${{ github.repository_owner }}
-            
-          flavor: |
-            latest=${{ github.event.inputs.docker_tag_latest == 'true' }}
-            
-          tags: |
-            type=semver,pattern={{version}},value=${{ github.event.inputs.synapse_version_name }}
+          flavor: latest=${{ github.event.inputs.docker_tag_latest == 'true' || github.event.inputs.synapse_version_name == 'latest' }}
+          tags: type=raw,value=${{ github.event.inputs.synapse_version_name }}
 
       - name: Echo docker metadata
         run: |
@@ -114,7 +109,7 @@ jobs:
           repository: dotwee/matrix-synapse-s3
 
       - name: Create a GitHub repository release tag
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: marvinpinto/action-automatic-releases@latest
         if: ${{ github.event.inputs.create_github_release_tag == 'true' }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
