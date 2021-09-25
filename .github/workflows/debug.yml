@@ -7,7 +7,12 @@ on:
         description: 'Enable docker build cache'
         required: false
         default: "true"
-        
+     
+      docker_tag_latest:
+        description: 'Add latest tag to docker images'
+        required: false
+        default: "false"
+       
       push_docker_images:
         description: 'Push built docker images to docker hub'
         required: false
@@ -33,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo variables
-        run: echo "build_with_cache=${{ github.event.inputs.build_with_cache }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
+        run: echo "build_with_cache=${{ github.event.inputs.build_with_cache }} docker_tag_latest=${{ github.event.inputs.docker_tag_latest }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
         
       - name: Checkout
         uses: actions/checkout@v2
@@ -53,6 +58,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: dotwee/matrix-synapse-s3
+          flavor: |
+            latest=${{ github.event.inputs.docker_tag_latest }}
+          tags: |
+            # minimal
+            type=semver,pattern={{version}},value=${{ github.event.inputs.synapse_version_name }}
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         if: ${{ github.event.inputs.push_docker_images == 'true' }}
@@ -70,16 +86,12 @@ jobs:
 
       - name: Build and push docker image with version tag
         uses: docker/build-push-action@v2
-        id: docker-build
         with:
           platforms: linux/amd64,linux/arm64
           build-args: TAG=${{ github.event.inputs.synapse_version_name }}
           push: ${{ github.event.inputs.push_docker_images == 'true' }}
-          tags: |
-            dotwee/matrix-synapse-s3:latest
-            dotwee/matrix-synapse-s3:${{ github.event.inputs.synapse_version_name }}
-            ghcr.io/dotwee/matrix-synapse-s3:latest
-            ghcr.io/dotwee/matrix-synapse-s3:${{ github.event.inputs.synapse_version_name }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Update Docker Hub repository description
         uses: peter-evans/dockerhub-description@v2
