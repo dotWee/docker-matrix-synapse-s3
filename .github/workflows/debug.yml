@@ -63,10 +63,14 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: dotwee/matrix-synapse-s3
+          labels: |
+            maintainer="Lukas Wolfsteiner <lukas@wolfsteiner.media>"
+            org.opencontainers.image.title="matrix-synapse-s3"
+            org.opencontainers.image.vendor="${{ github.repository_owner }}"
           flavor: |
             latest=${{ github.event.inputs.docker_tag_latest }}
           tags: |
-            # minimal
+            type=raw,value=${{ github.event.inputs.synapse_version_name }}
             type=semver,pattern={{version}},value=${{ github.event.inputs.synapse_version_name }}
 
       - name: Echo docker metadata
