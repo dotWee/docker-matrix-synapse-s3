@@ -59,7 +59,6 @@ jobs:
             ghcr.io/${{ github.repository }}
 
           labels: |
-            maintainer="Lukas Wolfsteiner <lukas@wolfsteiner.media>"
             org.opencontainers.image.title=matrix-synapse-s3
             org.opencontainers.image.vendor=${{ github.repository_owner }}
             
