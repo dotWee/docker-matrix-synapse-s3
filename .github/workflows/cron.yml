@@ -106,8 +106,8 @@ jobs:
           flavor: |
             latest=${{ needs.validate.outputs.version_name == 'true' }}
           tags: |
-            type=raw,value=${{ github.event.inputs.synapse_version_name }}
-            type=semver,pattern={{raw}},value=${{ github.event.inputs.synapse_version_name }}
+            type=raw,value=${{ needs.validate.outputs.version_name }}
+            type=semver,pattern={{raw}},value=${{ needs.validate.outputs.version_name }}
           labels: |
             maintainer=Lukas Wolfsteiner <lukas@wolfsteiner.media>
             org.opencontainers.image.title=matrix-synapse-s3
