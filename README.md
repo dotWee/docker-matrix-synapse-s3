@@ -13,21 +13,27 @@
 
 Custom [matrix-synapse](https://github.com/matrix-org/synapse) docker image with [synapse-s3-storage-provider](https://github.com/matrix-org/synapse-s3-storage-provider) preinstalled.
 
-## docker images
+## pull
 
-### from [docker hub](https://hub.docker.com/r/dotwee/matrix-synapse-s3)
+### from [**docker hub**](https://hub.docker.com/r/dotwee/matrix-synapse-s3)
 
-```
+```bash
 $ docker pull dotwee/matrix-synapse-s3:latest
 ```
 
-### from [github packages](https://github.com/dotWee/docker-matrix-synapse-s3/pkgs/container/matrix-synapse-s3)
+### from [**github packages**](https://github.com/dotWee/docker-matrix-synapse-s3/pkgs/container/matrix-synapse-s3)
 
-```
+```bash
 $ docker pull ghcr.io/dotwee/matrix-synapse-s3:latest
 ```
 
-## [license](#license)
+## use
+
+use just like the [_official docker image_](https://hub.docker.com/r/matrixdotorg/synapse) provided by matrix.org.
+
+>details in the [_official documentation_](https://matrix-org.github.io/synapse/latest/setup/installation.html#docker-images-and-ansible-playbooks).
+
+## license
 
 copyright (c) 2021 lukas 'dotwee' wolfsteiner <lukas@wolfsteiner.media>
 
