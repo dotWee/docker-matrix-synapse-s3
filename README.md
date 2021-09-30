@@ -26,3 +26,9 @@ $ docker pull dotwee/matrix-synapse-s3:latest
 ```
 $ docker pull ghcr.io/dotwee/matrix-synapse-s3:latest
 ```
+
+## [license](#license)
+
+copyright (c) 2021 lukas 'dotwee' wolfsteiner <lukas@wolfsteiner.media>
+
+licensed under the [_do what the fuck you want to_](/LICENSE) public license
