@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Pass custom synapse version using build args: 
 # docker build --build-arg "SYNAPSE_VERSION=v1.34.0" --build-arg "SYNAPSE_S3_STORAGE_PROVIDER_COMMIT=main" --tag matrix-synapse-s3 .
 ARG SYNAPSE_VERSION=latest
