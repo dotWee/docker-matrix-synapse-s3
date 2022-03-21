@@ -46,7 +46,7 @@ jobs:
       #  run: echo "docker_tag_latest=${{ github.event.inputs.docker_tag_latest }} push_docker_images=${{ github.event.inputs.push_docker_images }} update_dockerhub_readme=${{ github.event.inputs.update_dockerhub_readme }} synapse_version_name=${{ github.event.inputs.synapse_version_name }} create_github_release_tag=${{ github.event.inputs.create_github_release_tag }}"
         
       - name: Cache Docker layers
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         if: ${{ github.event.inputs.build_with_cache == 'true' }}
         with:
           path: /tmp/.buildx-cache
