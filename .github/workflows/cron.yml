@@ -125,7 +125,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Update Docker Hub repository description
-        uses: peter-evans/dockerhub-description@v2
+        uses: peter-evans/dockerhub-description@v3
         if: ${{ needs.validate.outputs.publish_version == 'true' }}
         with:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
