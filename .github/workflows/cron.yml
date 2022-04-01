@@ -104,7 +104,7 @@ jobs:
             dotwee/matrix-synapse-s3
             ghcr.io/dotwee/matrix-synapse-s3
           flavor: |
-            latest=${{ needs.validate.outputs.version_name == 'true' }}
+            latest=${{ !(contains(needs.validate.outputs.version_name, 'rc')) }}
           tags: |
             type=raw,value=${{ needs.validate.outputs.version_name }}
             type=semver,pattern={{raw}},value=${{ needs.validate.outputs.version_name }}
