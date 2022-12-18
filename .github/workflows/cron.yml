@@ -47,15 +47,15 @@ jobs:
         id: set-version-name
         run: |
           echo "SYNAPSE_VERSION=${{ env.SYNAPSE_VERSION }} DOCKER_VERSION=${{ env.DOCKER_VERSION }}"
-          echo "::set-output name=version_name::${{ env.SYNAPSE_VERSION }}"
+          echo "version_name=${{ env.SYNAPSE_VERSION }}" >> $GITHUB_OUTPUT
 
       - name: Compare versions
         id: compare-versions
-        run: echo "::set-output name=is_new_version::${{ env.SYNAPSE_VERSION != env.DOCKER_VERSION }}"
+        run: echo "is_new_version=${{ env.SYNAPSE_VERSION != env.DOCKER_VERSION }}" >> $GITHUB_OUTPUT
 
       - name: Set publish to false if manually triggered
         id: set-publish-version
-        run: echo "::set-output name=publish_version::${{ github.event.inputs.version_name == '' }}"
+        run: echo "publish_version=${{ github.event.inputs.version_name == '' }}" >> $GITHUB_OUTPUT
 
       - name: Echo outputs
         run: echo "version_name=${{ steps.set-version-name.outputs.version_name }} is_new_version=${{ steps.compare-versions.outputs.is_new_version }} publish_version=${{ steps.set-publish-version.outputs.publish_version }}"
