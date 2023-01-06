@@ -1,6 +1,6 @@
 # [`dotwee/matrix-synapse-s3`](https://github.com/dotWee/docker-matrix-synapse-s3)
 
-![github status](https://img.shields.io/github/actions/workflow/status/dotWee/docker-matrix-synapse-s3/cron.yml?branch=main?logo=GitHub)
+![github status](https://img.shields.io/github/actions/workflow/status/dotWee/docker-matrix-synapse-s3/cron.yml?branch=main&logo=GitHub)
 ![github activity](https://img.shields.io/github/last-commit/dotwee/docker-matrix-synapse-s3?logo=github)
 ![github latest tag](https://badgen.net/github/tag/dotwee/docker-matrix-synapse-s3?icon=github)
 ![github open issues](https://badgen.net/github/open-issues/dotwee/docker-matrix-synapse-s3?icon=github)
