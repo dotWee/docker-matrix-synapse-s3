@@ -6,9 +6,9 @@
 ![github open issues](https://badgen.net/github/open-issues/dotwee/docker-matrix-synapse-s3?icon=github)
 ![docker pulls](https://badgen.net/docker/pulls/dotwee/matrix-synapse-s3?icon=docker&label=pulls)
 
-Custom [matrix-synapse](https://github.com/matrix-org/synapse) docker image with [synapse-s3-storage-provider](https://github.com/matrix-org/synapse-s3-storage-provider) preinstalled.
+Custom [matrix-synapse](https://github.com/element-hq/synapse) docker image with [synapse-s3-storage-provider](https://github.com/element-hq/synapse-s3-storage-provider) preinstalled.
 
-## pull
+## pull it
 
 ### from [**docker hub**](https://hub.docker.com/r/dotwee/matrix-synapse-s3)
 
@@ -27,11 +27,11 @@ $ docker pull ghcr.io/dotwee/matrix-synapse-s3:latest
 - `linux/arm64`
 - `linux/amd64`
 
-## use
+## use it
 
-use just like the [_official docker image_](https://hub.docker.com/r/matrixdotorg/synapse) provided by matrix.org.
+use just like the [_official docker image_](https://github.com/element-hq/synapse/pkgs/container/synapse) provided by ~~matrix.org~~ Element.
 
->details in the [_official documentation_](https://matrix-org.github.io/synapse/latest/setup/installation.html#docker-images-and-ansible-playbooks).
+> details in the [_official documentation_](https://element-hq.github.io/synapse/latest/setup/installation.html#docker-images-and-ansible-playbooks).
 
 ## license
 
