@@ -107,6 +107,7 @@ jobs:
             latest=${{ !(contains(needs.validate.outputs.version_name, 'rc')) }}
           tags: |
             type=raw,value=${{ needs.validate.outputs.version_name }}
+            type=raw,enable=${{ !(contains(needs.validate.outputs.version_name, 'rc')) }},value=stable
             type=semver,pattern={{raw}},value=${{ needs.validate.outputs.version_name }}
           labels: |
             maintainer=Lukas Wolfsteiner <lukas@wolfsteiner.media>
