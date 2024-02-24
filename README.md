@@ -22,10 +22,16 @@ $ docker pull dotwee/matrix-synapse-s3:latest
 $ docker pull ghcr.io/dotwee/matrix-synapse-s3:latest
 ```
 
-### available tags
+### available architectures
 
 - `linux/arm64`
 - `linux/amd64`
+
+### available tags
+
+- for each version there exists a matching tag (e.g. `:v1.101.0`)
+- the most recent version including unstable release candidates are tagged with `:latest`
+- to lock onto only stable versions, use `:stable`
 
 ## use it
 
