@@ -6,7 +6,7 @@
 ![github open issues](https://badgen.net/github/open-issues/dotwee/docker-matrix-synapse-s3?icon=github)
 ![docker pulls](https://badgen.net/docker/pulls/dotwee/matrix-synapse-s3?icon=docker&label=pulls)
 
-Custom [matrix-synapse](https://github.com/element-hq/synapse) docker image with [synapse-s3-storage-provider](https://github.com/element-hq/synapse-s3-storage-provider) preinstalled.
+Custom [matrix-synapse](https://github.com/element-hq/synapse) docker image with [matrix-org/synapse-s3-storage-provider](https://github.com/matrix-org/synapse-s3-storage-provider) preinstalled.
 
 ## pull it
 
