@@ -115,7 +115,7 @@ jobs:
             org.opencontainers.image.source="https://github.com/${{ github.repository }}"
 
       - name: Build and push docker image with version tag
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         id: docker-build
         with:
           platforms: linux/amd64,linux/arm64

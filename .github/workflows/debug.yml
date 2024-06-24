@@ -100,7 +100,7 @@ jobs:
           password: ${{ secrets.GH_REGISTRY_TOKEN }}
 
       - name: Build and push docker image with version tag
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
           build-args: |
