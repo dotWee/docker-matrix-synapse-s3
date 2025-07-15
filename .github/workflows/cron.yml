@@ -17,9 +17,18 @@ jobs:
     steps:
       - name: Install depepndencies
         run: sudo apt-get install -y curl jq
-      - name: Request current GitHub Synapse Package version
-        run: echo 'SYNAPSE_VERSION='$(curl -SsL https://api.github.com/repos/element-hq/synapse/releases | jq -r '.[].tag_name' | head -n 1) >> $GITHUB_ENV
 
+      - name: Request current GitHub Synapse Package version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SYNAPSE_VERSION=$(curl -H "Authorization: token $GH_TOKEN" -SsL https://api.github.com/repos/element-hq/synapse/releases | jq -r '.[0].tag_name')
+          if [ -z "$SYNAPSE_VERSION" ]; then
+            echo "::error ::Could not retrieve Synapse version."
+            exit 1
+          fi
+          echo "SYNAPSE_VERSION=$SYNAPSE_VERSION" >> $GITHUB_ENV
+        
       - name: Request current Docker Hub Package version
         run: echo 'DOCKER_VERSION='$(curl -sSL https://registry.hub.docker.com/v2/repositories/dotwee/matrix-synapse-s3/tags | jq -r '."results"[]["name"] | select(.=="'${{ env.SYNAPSE_VERSION }}'")') >> $GITHUB_ENV
 
