@@ -122,6 +122,9 @@ jobs:
             maintainer=Lukas Wolfsteiner <lukas@wolfsteiner.media>
             org.opencontainers.image.title=matrix-synapse-s3
             org.opencontainers.image.source="https://github.com/${{ github.repository }}"
+            # Additional labels currently not supplied by docker/metadata-action
+            org.opencontainers.image.vendor="${{ github.author }}"
+            org.opencontainers.image.release="${{ needs.validate.outputs.version_name }}"
 
       - name: Build and push docker image with version tag
         uses: docker/build-push-action@v6
