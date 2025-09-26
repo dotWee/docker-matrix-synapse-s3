@@ -130,6 +130,7 @@ jobs:
         uses: docker/build-push-action@v6
         id: docker-build
         with:
+          sbom: true
           platforms: linux/amd64,linux/arm64
           build-args: |
             SYNAPSE_VERSION=${{ needs.validate.outputs.version_name }}
