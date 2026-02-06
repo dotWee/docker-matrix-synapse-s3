@@ -123,8 +123,9 @@ jobs:
             org.opencontainers.image.title=matrix-synapse-s3
             org.opencontainers.image.source="https://github.com/${{ github.repository }}"
             # Additional labels currently not supplied by docker/metadata-action
-            org.opencontainers.image.vendor="${{ github.author }}"
             org.opencontainers.image.release="${{ needs.validate.outputs.version_name }}"
+            org.opencontainers.image.description="Custom matrix-synapse docker image with synapse-s3-storage-provider preinstalled"
+            org.opencontainers.image.licenses=WTFPL
 
       - name: Build and push docker image with version tag
         uses: docker/build-push-action@v6
