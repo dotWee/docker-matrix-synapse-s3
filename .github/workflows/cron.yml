@@ -128,7 +128,7 @@ jobs:
             org.opencontainers.image.licenses=WTFPL
 
       - name: Build and push docker image with version tag
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         id: docker-build
         with:
           sbom: true
